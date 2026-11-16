@@ -11,7 +11,7 @@ void main() {
 
     expect(find.text('MyPortfolio'), findsOneWidget);
     expect(find.text('2506613514'), findsOneWidget);
-    expect(find.text('Arlen'), findsOneWidget);
+    expect(find.text('Rafael Arlen Wijanarko'), findsOneWidget);
     expect(find.text('PBP B'), findsOneWidget);
     expect(find.text('Lihat Proyek'), findsOneWidget);
     expect(find.text('Tambah Proyek'), findsOneWidget);
@@ -20,18 +20,23 @@ void main() {
     expect(find.byType(ItemCard), findsNWidgets(3));
   });
 
-  testWidgets('menu action shows the expected snackbar', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(const MyApp());
+  for (final action in ['Lihat Proyek', 'Tambah Proyek', 'Logout']) {
+    testWidgets('$action shows the expected snackbar', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(const MyApp());
 
-    await tester.tap(find.text('Lihat Proyek'));
-    await tester.pump();
+      await tester.tap(find.text(action));
+      await tester.pump();
 
-    expect(
-      find.text('Kamu telah menekan tombol Lihat Proyek!'),
-      findsOneWidget,
-    );
+      expect(find.text('Kamu telah menekan tombol $action!'), findsOneWidget);
+    });
+  }
+
+  test('menu actions use three distinct colors', () {
+    final colors = MyHomePage.items.map((item) => item.color).toSet();
+
+    expect(colors, hasLength(3));
   });
 
   test('homepage is stateless', () {
@@ -51,6 +56,7 @@ void main() {
       await tester.pump();
 
       expect(tester.takeException(), isNull);
+      expect(find.byKey(const Key('profile-cards-column')), findsOneWidget);
     });
   }
 }

@@ -4,7 +4,7 @@ class MyHomePage extends StatelessWidget {
   const MyHomePage({super.key});
 
   static const String npm = '2506613514';
-  static const String nama = 'Arlen';
+  static const String nama = 'Rafael Arlen Wijanarko';
   static const String kelas = 'PBP B';
 
   static const List<ItemHomepage> items = [
@@ -28,20 +28,35 @@ class MyHomePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Row(
-              children: [
-                Expanded(
-                  child: InfoCard(title: 'NPM', content: npm),
-                ),
-                SizedBox(width: 8),
-                Expanded(
-                  child: InfoCard(title: 'Name', content: nama),
-                ),
-                SizedBox(width: 8),
-                Expanded(
-                  child: InfoCard(title: 'Class', content: kelas),
-                ),
-              ],
+            LayoutBuilder(
+              builder: (context, constraints) {
+                if (constraints.maxWidth < 600) {
+                  return const Column(
+                    key: Key('profile-cards-column'),
+                    children: [
+                      InfoCard(title: 'NPM', content: npm),
+                      InfoCard(title: 'Name', content: nama),
+                      InfoCard(title: 'Class', content: kelas),
+                    ],
+                  );
+                }
+
+                return const Row(
+                  children: [
+                    Expanded(
+                      child: InfoCard(title: 'NPM', content: npm),
+                    ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: InfoCard(title: 'Name', content: nama),
+                    ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: InfoCard(title: 'Class', content: kelas),
+                    ),
+                  ],
+                );
+              },
             ),
             const SizedBox(height: 24),
             const Text(
