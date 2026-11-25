@@ -10,17 +10,21 @@ Aplikasi Flutter multiplatform untuk portofolio pribadi Rafael Arlen Wijanarko.
 - Warna latar yang berbeda untuk setiap kartu menu.
 - Umpan balik `SnackBar` untuk setiap tombol yang ditekan.
 - Layout responsif yang diuji pada viewport 375 × 812 dan 320 × 568.
+- **Tutorial 9:** drawer, navigasi antarhalaman, dan form proyek dengan validasi serta dialog pratinjau.
+- **Tutorial 10:** daftar akun, login, logout, daftar dan detail proyek dari Django, serta penyimpanan proyek untuk akun yang punya izin.
 
 ## Menjalankan Aplikasi
 
-Pastikan Flutter SDK sudah terpasang, lalu jalankan:
+Jalankan backend `myportfolio` dengan `python manage.py migrate` lalu `python manage.py runserver 0.0.0.0:8000`. Untuk Flutter Web, gunakan port 3000 agar sesuai dengan origin pengembangan yang diizinkan backend:
 
 ```bash
 flutter pub get
-flutter run -d chrome
+flutter run -d chrome --web-port=3000
 ```
 
 ## Verifikasi
+
+Untuk emulator Android, gunakan `flutter run --dart-define=DJANGO_BASE_URL=http://10.0.2.2:8000`. Untuk backend produksi, gunakan URL HTTPS melalui `DJANGO_BASE_URL` dan konfigurasi origin Flutter Web pada `MOBILE_ALLOWED_ORIGINS`. Pembuatan proyek tetap membutuhkan akun yang punya izin dan kode tulis backend.
 
 ```bash
 dart format --output=none --set-exit-if-changed lib test

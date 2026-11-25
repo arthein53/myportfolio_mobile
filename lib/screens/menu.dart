@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:myportofolio_mobile/services/portfolio_api.dart';
+import 'package:myportofolio_mobile/widgets/item_card.dart';
+import 'package:myportofolio_mobile/widgets/left_drawer.dart';
+import 'package:provider/provider.dart';
 
 class MyHomePage extends StatelessWidget {
   const MyHomePage({super.key});
@@ -8,15 +12,28 @@ class MyHomePage extends StatelessWidget {
   static const String kelas = 'PBP B';
 
   static const List<ItemHomepage> items = [
-    ItemHomepage('Lihat Proyek', Icons.folder, Color(0xFF4F46E5)),
-    ItemHomepage('Tambah Proyek', Icons.add_circle, Color(0xFFD97706)),
+    ItemHomepage(
+      'Lihat Proyek',
+      Icons.folder,
+      Color(0xFF4F46E5),
+      route: '/projects',
+    ),
+    ItemHomepage(
+      'Tambah Proyek',
+      Icons.add_circle,
+      Color(0xFFD97706),
+      route: '/projects/new',
+    ),
     ItemHomepage('Logout', Icons.logout, Color(0xFF7C3AED)),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final api = context.watch<PortfolioApi>();
     return Scaffold(
+      drawer: const LeftDrawer(),
       appBar: AppBar(
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
         title: const Text(
           'MyPortfolio',
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
@@ -82,7 +99,16 @@ class MyHomePage extends StatelessWidget {
                   crossAxisCount: 3,
                   childAspectRatio: childAspectRatio,
                   shrinkWrap: true,
-                  children: items.map((item) => ItemCard(item)).toList(),
+                  children: [
+                    for (final item in items)
+                      if (item.route != '/projects/new' || api.canWrite)
+                        ItemCard(
+                          item,
+                          onTap: api.signingOut
+                              ? null
+                              : () => _onTap(context, api, item),
+                        ),
+                  ],
                 );
               },
             ),
@@ -90,6 +116,31 @@ class MyHomePage extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+Future<void> _onTap(
+  BuildContext context,
+  PortfolioApi api,
+  ItemHomepage item,
+) async {
+  final messenger = ScaffoldMessenger.of(context);
+  messenger
+    ..hideCurrentSnackBar()
+    ..showSnackBar(
+      SnackBar(content: Text('Kamu telah menekan tombol ${item.name}!')),
+    );
+  if (item.route case final route?) {
+    Navigator.pushNamed(context, route);
+    return;
+  }
+  try {
+    await api.logout();
+  } on ApiException catch (error) {
+    if (!context.mounted) return;
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(error.message)));
   }
 }
 
@@ -111,57 +162,6 @@ class InfoCard extends StatelessWidget {
             const SizedBox(height: 8),
             FittedBox(child: Text(content)),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class ItemHomepage {
-  const ItemHomepage(this.name, this.icon, this.color);
-
-  final String name;
-  final IconData icon;
-  final Color color;
-}
-
-class ItemCard extends StatelessWidget {
-  const ItemCard(this.item, {super.key});
-
-  final ItemHomepage item;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: item.color,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: () {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              SnackBar(
-                content: Text('Kamu telah menekan tombol ${item.name}!'),
-              ),
-            );
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(item.icon, color: Colors.white, size: 30),
-                const Padding(padding: EdgeInsets.all(3)),
-                Text(
-                  item.name,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.white),
-                ),
-              ],
-            ),
-          ),
         ),
       ),
     );

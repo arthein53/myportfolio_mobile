@@ -1,13 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:myportofolio_mobile/main.dart';
-import 'package:myportofolio_mobile/menu.dart';
+import 'package:myportofolio_mobile/screens/menu.dart';
+import 'package:myportofolio_mobile/services/portfolio_api.dart';
+import 'package:myportofolio_mobile/widgets/item_card.dart';
+
+Future<void> pumpSignedIn(WidgetTester tester) async {
+  final api = PortfolioApi(
+    client: MockClient((request) async {
+      if (request.url.path == '/auth/login/') {
+        return http.Response('{"token":"fixture","can_write":true}', 200);
+      }
+      if (request.url.path == '/auth/logout/') return http.Response('', 204);
+      return http.Response('[]', 200);
+    }),
+  );
+  addTearDown(api.dispose);
+  await api.login('tester', 'example-password');
+  await tester.pumpWidget(MyApp(api: api));
+}
 
 void main() {
   testWidgets('homepage shows portfolio identity and menu actions', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const MyApp());
+    await pumpSignedIn(tester);
 
     expect(find.text('MyPortfolio'), findsOneWidget);
     expect(find.text('2506613514'), findsOneWidget);
@@ -24,10 +43,10 @@ void main() {
     testWidgets('$action shows the expected snackbar', (
       WidgetTester tester,
     ) async {
-      await tester.pumpWidget(const MyApp());
+      await pumpSignedIn(tester);
 
       await tester.tap(find.text(action));
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       expect(find.text('Kamu telah menekan tombol $action!'), findsOneWidget);
     });
@@ -52,7 +71,7 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
       addTearDown(tester.view.resetPhysicalSize);
 
-      await tester.pumpWidget(const MyApp());
+      await pumpSignedIn(tester);
       await tester.pump();
 
       expect(tester.takeException(), isNull);
